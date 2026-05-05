@@ -1,19 +1,24 @@
 // Peipe XHS Mobile Profile
-// This SCSS is loaded by NodeBB during asset build, so the original profile UI is hidden
-// before the client script finishes building the Xiaohongshu-style shell.
+// 关键原则：所有样式必须依赖 JS 显式添加的标记类，
+// 绝不直接通过 body.page-user 等 NodeBB 原生类触发，
+// 否则会污染聊天 / 设置 / 通知等所有 user/* 子页面。
+//
+// 状态类约定（由 JS 控制）：
+//   html.xhs-profile-html-candidate  —— JS 已确认是 profile 主页（首屏前置守卫）
+//   body.xhs-profile-candidate       —— 同上，body 级
+//   body.xhs-profile-active          —— XHS shell 已构建完成
+//   body.xhs-profile-failed          —— 构建失败，回退到原生 NodeBB UI
 
 @media (max-width: 768px) {
-  // Account route guard used for zero-flash mobile profile rendering.
-  // The body.page-user selectors are intentional: NodeBB outputs the body class
-  // before plugin JS runs, so this hides the original profile immediately on
-  // first paint. The :not(.xhs-profile-failed) guard restores the normal page if
-  // the expected account DOM cannot be found.
+
+  // ============================================================
+  // 1. 首屏零闪烁：隐藏原生 profile（仅在候选 / active 时生效）
+  //    注意：去掉了所有 body.page-user* 的兜底匹配，
+  //    只信任 JS 添加的标记类。
+  // ============================================================
   html.xhs-profile-html-candidate body,
   body.xhs-profile-candidate,
-  body.xhs-profile-active,
-  body.page-user:not(.xhs-profile-failed),
-  body[class^="page-user-"]:not(.xhs-profile-failed),
-  body[class*=" page-user-"]:not(.xhs-profile-failed) {
+  body.xhs-profile-active {
     overflow-x: hidden !important;
     background: #fff !important;
     padding-top: 0 !important;
@@ -67,6 +72,7 @@
       top: 0 !important;
     }
 
+    // 隐藏原生 profile 的 cover / 信息栏
     .account > .d-flex.flex-column.flex-md-row.gap-2.w-100.pb-4.mb-4.mt-2.border-bottom,
     .account .cover[component="account/cover"],
     .account .flex-shrink-0.pe-2.border-end-md.text-sm.mb-3.flex-basis-md-200 {
@@ -74,13 +80,13 @@
     }
   }
 
-  // While the client script is building the real shell, show a lightweight
-  // Xiaohongshu-style placeholder instead of the original NodeBB profile.
+  // ============================================================
+  // 2. 占位符（XHS 风格红色顶部 + 卡片骨架）
+  //    仅在 candidate 阶段显示，shell 构建完成 / 失败后立即移除。
+  //    去掉了 body.page-user* 的兜底，避免污染其他 user 子页面。
+  // ============================================================
   html.xhs-profile-html-candidate body:not(.xhs-profile-active):not(.xhs-profile-failed)::before,
-  body.xhs-profile-candidate:not(.xhs-profile-active):not(.xhs-profile-failed)::before,
-  body.page-user:not(.xhs-profile-active):not(.xhs-profile-failed)::before,
-  body[class^="page-user-"]:not(.xhs-profile-active):not(.xhs-profile-failed)::before,
-  body[class*=" page-user-"]:not(.xhs-profile-active):not(.xhs-profile-failed)::before {
+  body.xhs-profile-candidate:not(.xhs-profile-active):not(.xhs-profile-failed)::before {
     content: "";
     position: fixed;
     left: 0;
@@ -95,14 +101,12 @@
   }
 
   html.xhs-profile-html-candidate body:not(.xhs-profile-active):not(.xhs-profile-failed)::after,
-  body.xhs-profile-candidate:not(.xhs-profile-active):not(.xhs-profile-failed)::after,
-  body.page-user:not(.xhs-profile-active):not(.xhs-profile-failed)::after,
-  body[class^="page-user-"]:not(.xhs-profile-active):not(.xhs-profile-failed)::after,
-  body[class*=" page-user-"]:not(.xhs-profile-active):not(.xhs-profile-failed)::after {
+  body.xhs-profile-candidate:not(.xhs-profile-active):not(.xhs-profile-failed)::after {
     content: "";
     position: fixed;
     left: 16px;
-    top: 238px;
+    // 用 vh + 固定偏移避免不同高度设备错位
+    top: calc(28vh + 32px);
     width: calc(100vw - 32px);
     height: 148px;
     z-index: 2147483001;
@@ -115,53 +119,108 @@
     box-shadow: 0 12px 30px rgba(0,0,0,0.08);
   }
 
-  html.xhs-profile-html-candidate body .account-content,
-  body.xhs-profile-candidate .account-content,
-  body.page-user:not(.xhs-profile-active):not(.xhs-profile-failed) .account-content,
-  body[class^="page-user-"]:not(.xhs-profile-active):not(.xhs-profile-failed) .account-content,
-  body[class*=" page-user-"]:not(.xhs-profile-active):not(.xhs-profile-failed) .account-content {
+  // candidate 阶段隐藏 account-content（避免原生内容闪现）
+  html.xhs-profile-html-candidate body:not(.xhs-profile-active):not(.xhs-profile-failed) .account-content,
+  body.xhs-profile-candidate:not(.xhs-profile-active):not(.xhs-profile-failed) .account-content {
     opacity: 0 !important;
     visibility: hidden !important;
     min-height: 42vh !important;
   }
 
+  // active / failed 后恢复 account-content 显示
   body.xhs-profile-active .account-content,
   body.xhs-profile-failed .account-content {
     opacity: 1 !important;
     visibility: visible !important;
   }
 
-  body.xhs-profile-active [component="bottombar"] {
-    display: none !important;
+  // ============================================================
+  // 3. failed 状态：JS 失败回退，确保完全恢复原生 UI
+  //    （以下规则保证 fallback 时不残留任何 XHS 样式）
+  // ============================================================
+  body.xhs-profile-failed {
+    overflow-x: visible !important;
+    background: inherit !important;
+
+    // 注意：不重置 padding-top / margin-top，让 NodeBB 自己的 layout 接管
+    #xhs-profile-shell {
+      display: none !important;
+    }
   }
 
-  body.xhs-profile-active .sidebar-left,
-  body.xhs-profile-active .sidebar-right {
-    display: none !important;
+  // ============================================================
+  // 4. active 状态专属布局
+  // ============================================================
+  body.xhs-profile-active {
+    [component="bottombar"],
+    .sidebar-left,
+    .sidebar-right,
+    .fixed-bottom .navigator-mobile,
+    [data-widget-area="header"] {
+      display: none !important;
+    }
+
+    main#panel {
+      margin-top: 0 !important;
+      padding-top: 0 !important;
+    }
+
+    .layout-container {
+      padding-bottom: 0 !important;
+    }
+
+    #content {
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+      max-width: 100% !important;
+    }
+
+    .account {
+      padding: 0 !important;
+      margin: 0 !important;
+      max-width: 100% !important;
+      overflow: visible !important;
+    }
+
+    .account-content {
+      padding: 16px 16px 88px 16px !important;
+      min-height: 30vh;
+      position: relative;
+      z-index: 1;
+      background: #fff;
+
+      > * {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+      }
+    }
+
+    .account-stats.container {
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+    }
+
+    .alert {
+      border-radius: 12px;
+      font-size: 14px;
+      margin-left: 0;
+      margin-right: 0;
+    }
+
+    .topics-list .topic-row,
+    .topics-list > li {
+      border-radius: 12px;
+      margin-bottom: 8px;
+    }
+
+    .xhs-account-layout {
+      flex-direction: column !important;
+    }
   }
 
-  body.xhs-profile-active main#panel {
-    margin-top: 0 !important;
-    padding-top: 0 !important;
-  }
-
-  body.xhs-profile-active .layout-container {
-    padding-bottom: 0 !important;
-  }
-
-  body.xhs-profile-active #content {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-    max-width: 100% !important;
-  }
-
-  body.xhs-profile-active .account {
-    padding: 0 !important;
-    margin: 0 !important;
-    max-width: 100% !important;
-    overflow: visible !important;
-  }
-
+  // ============================================================
+  // 5. 工具类（仅由 JS 主动添加，跨页面无副作用）
+  // ============================================================
   .xhs-original-top-hidden,
   .xhs-hidden {
     display: none !important;
@@ -175,10 +234,10 @@
     overflow: hidden !important;
   }
 
-  body.xhs-profile-active .fixed-bottom .navigator-mobile {
-    display: none !important;
-  }
-
+  // ============================================================
+  // 6. XHS Shell 主体（这些类只在 #xhs-profile-shell 内出现，
+  //    不会污染其他页面）
+  // ============================================================
   #xhs-profile-shell {
     position: relative;
     z-index: 50;
@@ -192,6 +251,10 @@
     overflow: visible;
     background: #fff;
     z-index: 160;
+
+    &.xhs-no-bio .xhs-header-overlay {
+      bottom: 18px;
+    }
   }
 
   .xhs-cover {
@@ -221,10 +284,6 @@
     overflow: visible;
   }
 
-  #xhs-profile-header.xhs-no-bio .xhs-header-overlay {
-    bottom: 18px;
-  }
-
   #xhs-profile-topmenu {
     position: absolute;
     top: 14px;
@@ -251,10 +310,10 @@
     justify-content: center;
     padding: 0;
     box-shadow: 0 6px 18px rgba(0,0,0,0.18);
-  }
 
-  .xhs-topmenu-btn i {
-    font-size: 16px;
+    i {
+      font-size: 16px;
+    }
   }
 
   .xhs-user-main {
@@ -407,10 +466,10 @@
     display: flex;
     align-items: center;
     gap: 6px;
-  }
 
-  .xhs-country-line i {
-    font-size: 12px;
+    i {
+      font-size: 12px;
+    }
   }
 
   .xhs-mm-text {
@@ -478,10 +537,10 @@
   .xhs-btn-slot {
     display: flex;
     min-width: 0;
-  }
 
-  .xhs-btn-long-slot {
-    flex: 1 1 auto;
+    &.xhs-btn-long-slot {
+      flex: 1 1 auto;
+    }
   }
 
   .xhs-btn {
@@ -499,42 +558,42 @@
     white-space: nowrap;
     transition: all 0.18s ease;
     line-height: 1;
-  }
 
-  .xhs-btn-long {
-    min-width: 112px;
-    flex: 1 1 auto;
-  }
+    &.xhs-btn-long {
+      min-width: 112px;
+      flex: 1 1 auto;
+    }
 
-  .xhs-btn-primary {
-    background: #ff2442;
-    color: #fff !important;
-    box-shadow: 0 4px 12px rgba(255,36,66,0.22);
-  }
+    &.xhs-btn-primary {
+      background: #ff2442;
+      color: #fff !important;
+      box-shadow: 0 4px 12px rgba(255,36,66,0.22);
 
-  .xhs-btn-primary:active {
-    background: #e41d3a;
-    transform: translateY(1px);
-  }
+      &:active {
+        background: #e41d3a;
+        transform: translateY(1px);
+      }
+    }
 
-  .xhs-btn-outline {
-    background: rgba(0,0,0,0.28);
-    color: #fff !important;
-    border: 1px solid rgba(255,255,255,0.24);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-  }
+    &.xhs-btn-outline {
+      background: rgba(0,0,0,0.28);
+      color: #fff !important;
+      border: 1px solid rgba(255,255,255,0.24);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
 
-  .xhs-btn-outline:active {
-    background: rgba(0,0,0,0.38);
-  }
+      &:active {
+        background: rgba(0,0,0,0.38);
+      }
+    }
 
-  .xhs-btn-outline-muted {
-    background: rgba(0,0,0,0.38);
-    color: rgba(255,255,255,0.86) !important;
-    border: 1px solid rgba(255,255,255,0.12);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    &.xhs-btn-outline-muted {
+      background: rgba(0,0,0,0.38);
+      color: rgba(255,255,255,0.86) !important;
+      border: 1px solid rgba(255,255,255,0.12);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
   }
 
   .xhs-menu-wrap {
@@ -556,10 +615,10 @@
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(0,0,0,0.04);
-  }
 
-  .xhs-dropdown-menu.show {
-    display: block;
+    &.show {
+      display: block;
+    }
   }
 
   .xhs-menu-item {
@@ -577,19 +636,19 @@
     text-decoration: none !important;
     text-align: left;
     cursor: pointer;
-  }
 
-  .xhs-menu-item:active,
-  .xhs-menu-item.active {
-    background: #f5f5f5;
-  }
+    &:active,
+    &.active {
+      background: #f5f5f5;
+    }
 
-  .xhs-menu-item i {
-    color: #8f8f8f;
-    font-size: 14px;
-    width: 18px;
-    text-align: center;
-    text-shadow: none;
+    i {
+      color: #8f8f8f;
+      font-size: 14px;
+      width: 18px;
+      text-align: center;
+      text-shadow: none;
+    }
   }
 
   .xhs-menu-divider {
@@ -632,29 +691,11 @@
     white-space: nowrap;
     cursor: pointer;
     transition: all 0.15s ease;
-  }
 
-  .xhs-tab.active {
-    color: #ff2442 !important;
-    background: #fff1f4;
-  }
-
-  body.xhs-profile-active .account-content {
-    padding: 16px 16px 88px 16px !important;
-    min-height: 30vh;
-    position: relative;
-    z-index: 1;
-    background: #fff;
-  }
-
-  body.xhs-profile-active .account-content > * {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-  }
-
-  body.xhs-profile-active .account-stats.container {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
+    &.active {
+      color: #ff2442 !important;
+      background: #fff1f4;
+    }
   }
 
   .xhs-about-card {
@@ -662,26 +703,5 @@
     border-radius: 14px !important;
     box-shadow: none !important;
     background: #fafafa !important;
-  }
-
-  body.xhs-profile-active .alert {
-    border-radius: 12px;
-    font-size: 14px;
-    margin-left: 0;
-    margin-right: 0;
-  }
-
-  body.xhs-profile-active .topics-list .topic-row,
-  body.xhs-profile-active .topics-list > li {
-    border-radius: 12px;
-    margin-bottom: 8px;
-  }
-
-  body.xhs-profile-active [data-widget-area="header"] {
-    display: none !important;
-  }
-
-  body.xhs-profile-active .xhs-account-layout {
-    flex-direction: column !important;
   }
 }
