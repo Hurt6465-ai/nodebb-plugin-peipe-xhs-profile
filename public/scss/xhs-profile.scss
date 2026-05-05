@@ -1,7 +1,6 @@
 // Peipe XHS Mobile Profile
 // This SCSS is loaded by NodeBB during asset build, so the original profile UI is hidden
 // before the client script finishes building the Xiaohongshu-style shell.
-// HA-theme fix: no red preloader/background flash; use a plain white shield until the shell is ready.
 
 @media (max-width: 768px) {
   // Account route guard used for zero-flash mobile profile rendering.
@@ -17,10 +16,8 @@
   body[class*=" page-user-"]:not(.xhs-profile-failed) {
     overflow-x: hidden !important;
     background: #fff !important;
-    background-color: #fff !important;
     padding-top: 0 !important;
     margin-top: 0 !important;
-    min-height: 100vh !important;
 
     #header-menu,
     header,
@@ -77,47 +74,8 @@
     }
   }
 
-  // HA theme anti-flash: hide its user header/cover/card skeleton before JS marks the shell active.
-  // Keep #xhs-profile-shell visible if JS manages to create it before the active class is applied.
-  html.xhs-profile-html-candidate body:not(.xhs-profile-active):not(.xhs-profile-failed) .account > *:not(#xhs-profile-shell),
-  body.xhs-profile-candidate:not(.xhs-profile-active):not(.xhs-profile-failed) .account > *:not(#xhs-profile-shell),
-  body.page-user:not(.xhs-profile-active):not(.xhs-profile-failed) .account > *:not(#xhs-profile-shell),
-  body[class^="page-user-"]:not(.xhs-profile-active):not(.xhs-profile-failed) .account > *:not(#xhs-profile-shell),
-  body[class*=" page-user-"]:not(.xhs-profile-active):not(.xhs-profile-failed) .account > *:not(#xhs-profile-shell),
-  html.xhs-profile-html-candidate body:not(.xhs-profile-active):not(.xhs-profile-failed) [class*="account-cover"],
-  body.xhs-profile-candidate:not(.xhs-profile-active):not(.xhs-profile-failed) [class*="account-cover"],
-  body.page-user:not(.xhs-profile-active):not(.xhs-profile-failed) [class*="account-cover"],
-  html.xhs-profile-html-candidate body:not(.xhs-profile-active):not(.xhs-profile-failed) [class*="profile-cover"],
-  body.xhs-profile-candidate:not(.xhs-profile-active):not(.xhs-profile-failed) [class*="profile-cover"],
-  body.page-user:not(.xhs-profile-active):not(.xhs-profile-failed) [class*="profile-cover"],
-  html.xhs-profile-html-candidate body:not(.xhs-profile-active):not(.xhs-profile-failed) [class*="user-cover"],
-  body.xhs-profile-candidate:not(.xhs-profile-active):not(.xhs-profile-failed) [class*="user-cover"],
-  body.page-user:not(.xhs-profile-active):not(.xhs-profile-failed) [class*="user-cover"],
-  html.xhs-profile-html-candidate body:not(.xhs-profile-active):not(.xhs-profile-failed) [class*="profile-header"],
-  body.xhs-profile-candidate:not(.xhs-profile-active):not(.xhs-profile-failed) [class*="profile-header"],
-  body.page-user:not(.xhs-profile-active):not(.xhs-profile-failed) [class*="profile-header"],
-  html.xhs-profile-html-candidate body:not(.xhs-profile-active):not(.xhs-profile-failed) [class*="user-header"],
-  body.xhs-profile-candidate:not(.xhs-profile-active):not(.xhs-profile-failed) [class*="user-header"],
-  body.page-user:not(.xhs-profile-active):not(.xhs-profile-failed) [class*="user-header"] {
-    opacity: 0 !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-  }
-
-  html.xhs-profile-html-candidate body:not(.xhs-profile-active):not(.xhs-profile-failed) .account::before,
-  html.xhs-profile-html-candidate body:not(.xhs-profile-active):not(.xhs-profile-failed) .account::after,
-  body.xhs-profile-candidate:not(.xhs-profile-active):not(.xhs-profile-failed) .account::before,
-  body.xhs-profile-candidate:not(.xhs-profile-active):not(.xhs-profile-failed) .account::after,
-  body.page-user:not(.xhs-profile-active):not(.xhs-profile-failed) .account::before,
-  body.page-user:not(.xhs-profile-active):not(.xhs-profile-failed) .account::after {
-    content: none !important;
-    display: none !important;
-    background: transparent !important;
-    box-shadow: none !important;
-  }
-
-  // While the client script is building the real shell, use a plain white
-  // shield instead of HA's red profile skeleton or the old red placeholder.
+  // While the client script is building the real shell, show a lightweight
+  // Xiaohongshu-style placeholder instead of the original NodeBB profile.
   html.xhs-profile-html-candidate body:not(.xhs-profile-active):not(.xhs-profile-failed)::before,
   body.xhs-profile-candidate:not(.xhs-profile-active):not(.xhs-profile-failed)::before,
   body.page-user:not(.xhs-profile-active):not(.xhs-profile-failed)::before,
@@ -184,10 +142,12 @@
   }
 
   body.xhs-profile-active .account {
+    position: relative !important;
     padding: 0 !important;
     margin: 0 !important;
     max-width: 100% !important;
     overflow: visible !important;
+    background: #fff !important;
   }
 
   .xhs-original-top-hidden,
@@ -207,36 +167,89 @@
     display: none !important;
   }
 
+  // HA theme hard reset: the original cover/header can otherwise sit above the
+  // generated shell and make the uploaded background look like it is "sticking out".
+  body.xhs-profile-active .account .cover:not(.xhs-cover),
+  body.xhs-profile-active .account > .cover,
+  body.xhs-profile-active .account [component="account/cover"],
+  body.xhs-profile-active .account .ha-profile-cover,
+  body.xhs-profile-active .account .profile-cover,
+  body.xhs-profile-active .account .user-cover,
+  body.xhs-profile-active .account .cover-container,
+  body.xhs-profile-active .account .account-cover,
+  body.xhs-profile-active .account [class*="profile-cover"],
+  body.xhs-profile-active .account [class*="user-cover"],
+  body.xhs-profile-active .account [class*="account-cover"] {
+    position: absolute !important;
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    z-index: -1 !important;
+  }
+
+  body.xhs-profile-active #xhs-profile-shell,
   #xhs-profile-shell {
-    position: relative;
-    z-index: 50;
-    background: #fff;
+    position: relative !important;
+    z-index: 50 !important;
+    background: #fff !important;
+    isolation: isolate !important;
+    overflow: visible !important;
   }
 
+  body.xhs-profile-active #xhs-profile-header,
   #xhs-profile-header {
-    position: relative;
-    width: 100%;
-    min-height: 340px;
-    overflow: visible;
-    background: #fff;
-    z-index: 160;
+    position: relative !important;
+    width: 100% !important;
+    height: 340px !important;
+    min-height: 340px !important;
+    max-height: 340px !important;
+    overflow: hidden !important;
+    background: #fff !important;
+    z-index: 160 !important;
+    border-radius: 0 !important;
+    transform: none !important;
   }
 
+  body.xhs-profile-active #xhs-profile-header .xhs-cover,
   .xhs-cover {
-    width: 100%;
-    height: 340px;
-    background-size: cover;
-    background-position: center top;
-    background-repeat: no-repeat;
-    position: absolute;
-    inset: 0;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: auto !important;
+    width: 100% !important;
+    height: 340px !important;
+    min-height: 340px !important;
+    max-height: 340px !important;
+    background-size: cover !important;
+    background-position: center top !important;
+    background-repeat: no-repeat !important;
+    border-radius: 0 !important;
+    transform: none !important;
+    overflow: hidden !important;
+    z-index: 0 !important;
   }
 
+  body.xhs-profile-active #xhs-profile-header .xhs-cover-shade,
   .xhs-cover-shade {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0.26) 55%, rgba(0,0,0,0.58) 100%);
-    z-index: 1;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: auto !important;
+    width: 100% !important;
+    height: 340px !important;
+    min-height: 340px !important;
+    max-height: 340px !important;
+    background: linear-gradient(180deg, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0.26) 55%, rgba(0,0,0,0.58) 100%) !important;
+    z-index: 1 !important;
+    pointer-events: none !important;
   }
 
   .xhs-header-overlay {
@@ -668,11 +681,17 @@
   }
 
   body.xhs-profile-active .account-content {
+    clear: both !important;
+    display: block !important;
     padding: 16px 16px 88px 16px !important;
-    min-height: 30vh;
-    position: relative;
-    z-index: 1;
-    background: #fff;
+    min-height: 30vh !important;
+    position: relative !important;
+    z-index: 20 !important;
+    background: #fff !important;
+    margin-top: 0 !important;
+    border-radius: 0 !important;
+    transform: none !important;
+    overflow: visible !important;
   }
 
   body.xhs-profile-active .account-content > * {
@@ -712,4 +731,11 @@
   body.xhs-profile-active .xhs-account-layout {
     flex-direction: column !important;
   }
+
+  body.xhs-profile-active::before,
+  body.xhs-profile-active::after {
+    content: none !important;
+    display: none !important;
+  }
+
 }
