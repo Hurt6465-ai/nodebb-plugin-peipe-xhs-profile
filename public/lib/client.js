@@ -92,6 +92,11 @@ if (typeof URL !== 'undefined' && typeof URL.canParse !== 'function') {
     style.id = EARLY_STYLE_ID;
     style.textContent = `
 @media (max-width: 768px) {
+  /*
+   * Keep this inline guard small and state-based only.
+   * Never target body.page-user or body[class*="page-user-"] here:
+   * those classes also appear on chats/settings/notifications routes.
+   */
   html.xhs-profile-html-candidate,
   html.xhs-profile-html-candidate body,
   body.xhs-profile-candidate,
@@ -102,9 +107,19 @@ if (typeof URL !== 'undefined' && typeof URL.canParse !== 'function') {
     overflow-x: hidden !important;
   }
 
-  html.xhs-profile-html-candidate body:not(.xhs-profile-active),
-  body.xhs-profile-candidate {
+  html.xhs-profile-html-candidate body:not(.xhs-profile-active):not(.xhs-profile-failed),
+  body.xhs-profile-candidate:not(.xhs-profile-active):not(.xhs-profile-failed) {
     min-height: 100vh !important;
+  }
+
+  html.xhs-profile-html-candidate body:not(.xhs-profile-active):not(.xhs-profile-failed)::before,
+  body.xhs-profile-candidate:not(.xhs-profile-active):not(.xhs-profile-failed)::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 2147483000;
+    pointer-events: none;
+    background: #fff;
   }
 
   body.xhs-profile-candidate #panel,
@@ -183,66 +198,77 @@ if (typeof URL !== 'undefined' && typeof URL.canParse !== 'function') {
     overflow: hidden !important;
   }
 
-  body.xhs-profile-candidate .account,
-  body.xhs-profile-candidate [component="account/cover"],
-  body.xhs-profile-candidate .cover,
-  body.xhs-profile-candidate .account-header,
-  body.xhs-profile-candidate .profile-header,
-  body.xhs-profile-candidate .user-profile-header,
-  body.xhs-profile-candidate [class*="account-header"],
-  body.xhs-profile-candidate [class*="profile-header"],
-  body.xhs-profile-candidate [class*="profileHeader"],
-  body.xhs-profile-candidate [class*="cover"],
-  body.xhs-profile-candidate [class*="Cover"],
-  body.xhs-profile-candidate [class*="skeleton"],
-  body.xhs-profile-candidate [class*="Skeleton"],
-  body.xhs-profile-candidate [class*="placeholder"],
-  body.xhs-profile-candidate [class*="Placeholder"],
-  html.xhs-profile-html-candidate body:not(.xhs-profile-active) .account,
-  html.xhs-profile-html-candidate body:not(.xhs-profile-active) [component="account/cover"],
-  html.xhs-profile-html-candidate body:not(.xhs-profile-active) .cover,
-  html.xhs-profile-html-candidate body:not(.xhs-profile-active) .account-header,
-  html.xhs-profile-html-candidate body:not(.xhs-profile-active) .profile-header,
-  html.xhs-profile-html-candidate body:not(.xhs-profile-active) .user-profile-header,
-  html.xhs-profile-html-candidate body:not(.xhs-profile-active) [class*="account-header"],
-  html.xhs-profile-html-candidate body:not(.xhs-profile-active) [class*="profile-header"],
-  html.xhs-profile-html-candidate body:not(.xhs-profile-active) [class*="profileHeader"],
-  html.xhs-profile-html-candidate body:not(.xhs-profile-active) [class*="cover"],
-  html.xhs-profile-html-candidate body:not(.xhs-profile-active) [class*="Cover"],
-  html.xhs-profile-html-candidate body:not(.xhs-profile-active) [class*="skeleton"],
-  html.xhs-profile-html-candidate body:not(.xhs-profile-active) [class*="Skeleton"],
-  html.xhs-profile-html-candidate body:not(.xhs-profile-active) [class*="placeholder"],
-  html.xhs-profile-html-candidate body:not(.xhs-profile-active) [class*="Placeholder"] {
+  /*
+   * Hide the native profile while the XHS shell is being prepared.
+   * Do not use broad [class*="cover"] / [class*="header"] selectors here;
+   * HA theme uses many such names outside the profile shell.
+   */
+  html.xhs-profile-html-candidate body:not(.xhs-profile-active):not(.xhs-profile-failed) .account,
+  body.xhs-profile-candidate:not(.xhs-profile-active):not(.xhs-profile-failed) .account {
     opacity: 0 !important;
     visibility: hidden !important;
     pointer-events: none !important;
   }
 
-  body.xhs-profile-candidate #xhs-profile-shell,
-  body.xhs-profile-candidate #xhs-profile-header,
-  body.xhs-profile-candidate #xhs-profile-topmenu,
-  body.xhs-profile-candidate #xhs-tab-nav,
-  body.xhs-profile-active #xhs-profile-shell,
-  body.xhs-profile-active #xhs-profile-header,
-  body.xhs-profile-active #xhs-profile-topmenu,
-  body.xhs-profile-active #xhs-tab-nav {
+  body.xhs-profile-active .account .cover[component="account/cover"],
+  body.xhs-profile-active .account > .cover:not(.xhs-cover),
+  body.xhs-profile-active .account .account-header:not(#xhs-profile-header),
+  body.xhs-profile-active .account .profile-header:not(#xhs-profile-header),
+  body.xhs-profile-active .account .user-profile-header:not(#xhs-profile-header),
+  body.xhs-profile-active .account .ha-profile-header:not(#xhs-profile-header) {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  body.xhs-profile-active #xhs-profile-shell {
     display: block !important;
+    position: relative !important;
+    z-index: 50 !important;
+    background: #fff !important;
     visibility: visible !important;
     opacity: 1 !important;
-    height: auto !important;
-    min-height: initial !important;
-    max-height: none !important;
     overflow: visible !important;
     pointer-events: auto !important;
   }
 
+  body.xhs-profile-active #xhs-profile-header {
+    display: block !important;
+    position: relative !important;
+    width: 100% !important;
+    height: 340px !important;
+    min-height: 340px !important;
+    max-height: 340px !important;
+    overflow: hidden !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
   body.xhs-profile-active #xhs-profile-header .xhs-cover,
-  body.xhs-profile-active #xhs-profile-header .xhs-cover-shade,
+  body.xhs-profile-active #xhs-profile-header .xhs-cover-shade {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: none !important;
+    height: 340px !important;
+    min-height: 340px !important;
+    max-height: 340px !important;
+    overflow: hidden !important;
+  }
+
   body.xhs-profile-active #xhs-profile-header .xhs-header-overlay,
   body.xhs-profile-active #xhs-profile-header .xhs-avatar-wrap,
   body.xhs-profile-active #xhs-profile-header .xhs-avatar-circle,
   body.xhs-profile-active #xhs-profile-header .xhs-avatar-img,
-  body.xhs-profile-active #xhs-profile-header .xhs-avatar-fallback {
+  body.xhs-profile-active #xhs-profile-header .xhs-avatar-fallback,
+  body.xhs-profile-active #xhs-profile-topmenu,
+  body.xhs-profile-active #xhs-tab-nav {
     visibility: visible !important;
     opacity: 1 !important;
     pointer-events: auto !important;
@@ -254,15 +280,13 @@ if (typeof URL !== 'undefined' && typeof URL.canParse !== 'function') {
   }
 
   $(window).on('action:ajaxify.start', function () {
+    /*
+     * Do not carry candidate state from the old route. During ajaxify.start,
+     * NodeBB often still exposes the previous URL/template. Keeping that state
+     * is what makes /user/* subpages such as chats/settings get covered.
+     */
     cleanupInjected();
-
-    // Keep the original profile hidden during ajaxify transitions. If the next
-    // route is not a profile page, action:ajaxify.end restores the normal UI.
-    if (window.innerWidth <= MOBILE_MAX && isAccountPage()) {
-      setEarlyCandidateState(true);
-    } else {
-      restoreGlobalUI();
-    }
+    restoreGlobalUI();
   });
 
   $(window).on('action:ajaxify.end', function () {
@@ -309,13 +333,13 @@ if (typeof URL !== 'undefined' && typeof URL.canParse !== 'function') {
   function primeEarlyBodyState() {
     const shouldPrime = window.innerWidth <= MOBILE_MAX && routeLooksLikeAccountPage();
 
-    if (document.documentElement) {
-      document.documentElement.classList.toggle('xhs-profile-html-candidate', shouldPrime);
-    }
-
     if (!document.body) {
       if (shouldPrime && document.addEventListener) {
         document.addEventListener('DOMContentLoaded', primeEarlyBodyState, { once: true });
+      }
+
+      if (document.documentElement) {
+        document.documentElement.classList.toggle('xhs-profile-html-candidate', shouldPrime);
       }
       return;
     }
@@ -324,41 +348,94 @@ if (typeof URL !== 'undefined' && typeof URL.canParse !== 'function') {
   }
 
   function setEarlyCandidateState(shouldPrime) {
+    const next = !!shouldPrime;
+
     if (document.documentElement) {
-      document.documentElement.classList.toggle('xhs-profile-html-candidate', !!shouldPrime);
+      document.documentElement.classList.toggle('xhs-profile-html-candidate', next);
     }
 
     if (!document.body) return;
 
-    if (shouldPrime) {
-      $('body').addClass('xhs-profile-candidate').removeClass('xhs-profile-active xhs-profile-failed');
+    if (next) {
+      $('body')
+        .addClass('xhs-profile-candidate')
+        .removeClass('xhs-profile-active xhs-profile-failed');
     } else {
       $('body').removeClass('xhs-profile-candidate');
       if (document.documentElement) {
-        if (document.documentElement) {
         document.documentElement.classList.remove('xhs-profile-html-candidate');
-      }
       }
     }
   }
 
-  function routeLooksLikeAccountPage() {
+  function getAccountRouteInfo() {
     const parts = getPathParts();
-    return parts.indexOf('user') !== -1 && !!parts[parts.indexOf('user') + 1];
+    const userIndex = parts.indexOf('user');
+
+    if (userIndex === -1 || !parts[userIndex + 1]) {
+      return {
+        isUserRoute: false,
+        slug: '',
+        section: '',
+        isProfileSection: false
+      };
+    }
+
+    const rawSection = parts[userIndex + 2] || '';
+    const section = String(rawSection || '').toLowerCase();
+
+    /*
+     * XHS mobile shell should only run on the public profile pages.
+     * Keep all account subpages native: chats, settings, edit, theme,
+     * followers, following, notifications, bookmarks, uploads, etc.
+     */
+    const allowedSections = ['', 'about', 'topics'];
+
+    return {
+      isUserRoute: true,
+      slug: parts[userIndex + 1],
+      section: section || 'about',
+      isProfileSection: allowedSections.indexOf(section) !== -1
+    };
+  }
+
+  function routeLooksLikeAccountPage() {
+    return getAccountRouteInfo().isProfileSection;
   }
 
   function isAccountPage() {
+    if (window.innerWidth > MOBILE_MAX) return false;
+
+    const route = getAccountRouteInfo();
+    if (!route.isProfileSection) return false;
+
     const data = window.ajaxify && window.ajaxify.data;
     const tpl = data && data.template && data.template.name;
 
-    if (tpl && tpl.indexOf('account/') === 0) return true;
-    if (routeLooksLikeAccountPage()) return true;
+    if (tpl) {
+      const lowerTpl = String(tpl).toLowerCase();
+      const blocked = [
+        'edit',
+        'settings',
+        'theme',
+        'info',
+        'chat',
+        'chats',
+        'notifications',
+        'bookmarks',
+        'watched',
+        'followers',
+        'following',
+        'posts',
+        'uploads'
+      ];
 
-    if (!document.body || !document.body.classList) return false;
+      for (let i = 0; i < blocked.length; i += 1) {
+        if (lowerTpl.indexOf(blocked[i]) !== -1) return false;
+      }
+    }
 
-    return Array.prototype.some.call(document.body.classList, function (cls) {
-      return cls === 'page-user' || cls.indexOf('page-user-') === 0;
-    });
+    return true;
   }
 
   function scheduleInit() {
@@ -420,7 +497,9 @@ if (typeof URL !== 'undefined' && typeof URL.canParse !== 'function') {
     initTimeout = setTimeout(function () {
       cleanupInitWait();
       $('body').removeClass('xhs-profile-candidate').addClass('xhs-profile-failed');
-      document.documentElement.classList.remove('xhs-profile-html-candidate');
+      if (document.documentElement) {
+        document.documentElement.classList.remove('xhs-profile-html-candidate');
+      }
     }, INIT_TIMEOUT_MS);
   }
 
