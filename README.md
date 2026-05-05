@@ -19,6 +19,14 @@ NodeBB 用户个人主页移动端“小红书风格”H5 化插件。
   - 英文：`en-GB`
   - 缅语：`my-MM`
 
+## 本版优化说明
+
+- 移动端用户页首屏不再露出原 NodeBB 用户页顶部资料区：CSS 在 JS 初始化前先隐藏原版区域，并显示小红书风格占位层。
+- 新样式 shell 完整构建后才切换到 `xhs-profile-active`，避免初始化过程中的一帧原样式闪现。
+- 如果 5 秒内找不到兼容的账号页 DOM，会切换到 `xhs-profile-failed` 并恢复原版页面，不会把原用户页永久隐藏。
+- 背景图上传压缩监听只在移动端账号页有效，离开账号页会解绑，避免影响其他上传入口。
+- `targetBytes` 与 `maxSizeMB` 已统一为约 0.38 MB。
+
 ## 文件结构
 
 ```text
@@ -100,7 +108,7 @@ const IMAGE_CONFIG = {
   useWebp: false,
   minCompressBytes: 120 * 1024,
   targetBytes: Math.round(0.38 * 1024 * 1024),
-  maxSizeMB: 0.18,
+  maxSizeMB: 0.38,
   maxWidthOrHeight: 720,
   initialQuality: 0.42,
   preserveExif: false,
