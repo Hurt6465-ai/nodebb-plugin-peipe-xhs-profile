@@ -24,6 +24,7 @@ if (typeof URL !== 'undefined' && typeof URL.canParse !== 'function') {
   const MAX_INIT_RETRIES = 60;
   const INIT_TIMEOUT_MS = 5000;
   const RESIZE_DEBOUNCE_MS = 120;
+  const EARLY_STYLE_ID = 'xhs-profile-early-noflash-style';
 
   const IMAGE_CONFIG = {
     useWebp: false,
@@ -80,7 +81,177 @@ if (typeof URL !== 'undefined' && typeof URL.canParse !== 'function') {
   let coverUploadCompressionBound = false;
   const encodeSupportCache = {};
 
+  ensureEarlyNoFlashStyle();
   primeEarlyBodyState();
+
+
+  function ensureEarlyNoFlashStyle() {
+    if (typeof document === 'undefined' || document.getElementById(EARLY_STYLE_ID)) return;
+
+    const style = document.createElement('style');
+    style.id = EARLY_STYLE_ID;
+    style.textContent = `
+@media (max-width: 768px) {
+  html.xhs-profile-html-candidate,
+  html.xhs-profile-html-candidate body,
+  body.xhs-profile-candidate,
+  body.xhs-profile-active {
+    background: #fff !important;
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+    overflow-x: hidden !important;
+  }
+
+  html.xhs-profile-html-candidate body:not(.xhs-profile-active),
+  body.xhs-profile-candidate {
+    min-height: 100vh !important;
+  }
+
+  body.xhs-profile-candidate #panel,
+  body.xhs-profile-candidate main#panel,
+  body.xhs-profile-candidate .layout-container,
+  body.xhs-profile-candidate #content,
+  body.xhs-profile-candidate .content,
+  body.xhs-profile-candidate .container,
+  body.xhs-profile-candidate .container-lg,
+  body.xhs-profile-candidate .container-xl,
+  body.xhs-profile-active #panel,
+  body.xhs-profile-active main#panel,
+  body.xhs-profile-active .layout-container,
+  body.xhs-profile-active #content,
+  body.xhs-profile-active .content,
+  body.xhs-profile-active .container,
+  body.xhs-profile-active .container-lg,
+  body.xhs-profile-active .container-xl {
+    background: #fff !important;
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+    top: 0 !important;
+  }
+
+  body.xhs-profile-candidate #header-menu,
+  body.xhs-profile-candidate header,
+  body.xhs-profile-candidate #header,
+  body.xhs-profile-candidate .header,
+  body.xhs-profile-candidate .navbar,
+  body.xhs-profile-candidate nav.navbar,
+  body.xhs-profile-candidate .navbar-header,
+  body.xhs-profile-candidate .navbar-container,
+  body.xhs-profile-candidate .navbar-fixed-top,
+  body.xhs-profile-candidate .fixed-top,
+  body.xhs-profile-candidate .sticky-top,
+  body.xhs-profile-candidate [component="navbar"],
+  body.xhs-profile-candidate [component="navigation/navbar"],
+  body.xhs-profile-candidate [component="navbar/search"],
+  body.xhs-profile-candidate [component="search"],
+  body.xhs-profile-candidate [component="notifications"],
+  body.xhs-profile-candidate [component="chat/nav-wrapper"],
+  body.xhs-profile-candidate [component="chat/message/notification"],
+  body.xhs-profile-candidate [component="bottombar"],
+  body.xhs-profile-candidate [data-widget-area="header"],
+  body.xhs-profile-candidate .header-spacer,
+  body.xhs-profile-candidate .navbar-spacer,
+  body.xhs-profile-active #header-menu,
+  body.xhs-profile-active header,
+  body.xhs-profile-active #header,
+  body.xhs-profile-active .header,
+  body.xhs-profile-active .navbar,
+  body.xhs-profile-active nav.navbar,
+  body.xhs-profile-active .navbar-header,
+  body.xhs-profile-active .navbar-container,
+  body.xhs-profile-active .navbar-fixed-top,
+  body.xhs-profile-active .fixed-top,
+  body.xhs-profile-active .sticky-top,
+  body.xhs-profile-active [component="navbar"],
+  body.xhs-profile-active [component="navigation/navbar"],
+  body.xhs-profile-active [component="navbar/search"],
+  body.xhs-profile-active [component="search"],
+  body.xhs-profile-active [component="notifications"],
+  body.xhs-profile-active [component="chat/nav-wrapper"],
+  body.xhs-profile-active [component="chat/message/notification"],
+  body.xhs-profile-active [component="bottombar"],
+  body.xhs-profile-active [data-widget-area="header"],
+  body.xhs-profile-active .header-spacer,
+  body.xhs-profile-active .navbar-spacer {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  body.xhs-profile-candidate .account,
+  body.xhs-profile-candidate [component="account/cover"],
+  body.xhs-profile-candidate .cover,
+  body.xhs-profile-candidate .account-header,
+  body.xhs-profile-candidate .profile-header,
+  body.xhs-profile-candidate .user-profile-header,
+  body.xhs-profile-candidate [class*="account-header"],
+  body.xhs-profile-candidate [class*="profile-header"],
+  body.xhs-profile-candidate [class*="profileHeader"],
+  body.xhs-profile-candidate [class*="cover"],
+  body.xhs-profile-candidate [class*="Cover"],
+  body.xhs-profile-candidate [class*="skeleton"],
+  body.xhs-profile-candidate [class*="Skeleton"],
+  body.xhs-profile-candidate [class*="placeholder"],
+  body.xhs-profile-candidate [class*="Placeholder"],
+  html.xhs-profile-html-candidate body:not(.xhs-profile-active) .account,
+  html.xhs-profile-html-candidate body:not(.xhs-profile-active) [component="account/cover"],
+  html.xhs-profile-html-candidate body:not(.xhs-profile-active) .cover,
+  html.xhs-profile-html-candidate body:not(.xhs-profile-active) .account-header,
+  html.xhs-profile-html-candidate body:not(.xhs-profile-active) .profile-header,
+  html.xhs-profile-html-candidate body:not(.xhs-profile-active) .user-profile-header,
+  html.xhs-profile-html-candidate body:not(.xhs-profile-active) [class*="account-header"],
+  html.xhs-profile-html-candidate body:not(.xhs-profile-active) [class*="profile-header"],
+  html.xhs-profile-html-candidate body:not(.xhs-profile-active) [class*="profileHeader"],
+  html.xhs-profile-html-candidate body:not(.xhs-profile-active) [class*="cover"],
+  html.xhs-profile-html-candidate body:not(.xhs-profile-active) [class*="Cover"],
+  html.xhs-profile-html-candidate body:not(.xhs-profile-active) [class*="skeleton"],
+  html.xhs-profile-html-candidate body:not(.xhs-profile-active) [class*="Skeleton"],
+  html.xhs-profile-html-candidate body:not(.xhs-profile-active) [class*="placeholder"],
+  html.xhs-profile-html-candidate body:not(.xhs-profile-active) [class*="Placeholder"] {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  body.xhs-profile-candidate #xhs-profile-shell,
+  body.xhs-profile-candidate #xhs-profile-header,
+  body.xhs-profile-candidate #xhs-profile-topmenu,
+  body.xhs-profile-candidate #xhs-tab-nav,
+  body.xhs-profile-active #xhs-profile-shell,
+  body.xhs-profile-active #xhs-profile-header,
+  body.xhs-profile-active #xhs-profile-topmenu,
+  body.xhs-profile-active #xhs-tab-nav {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: auto !important;
+    min-height: initial !important;
+    max-height: none !important;
+    overflow: visible !important;
+    pointer-events: auto !important;
+  }
+
+  body.xhs-profile-active #xhs-profile-header .xhs-cover,
+  body.xhs-profile-active #xhs-profile-header .xhs-cover-shade,
+  body.xhs-profile-active #xhs-profile-header .xhs-header-overlay,
+  body.xhs-profile-active #xhs-profile-header .xhs-avatar-wrap,
+  body.xhs-profile-active #xhs-profile-header .xhs-avatar-circle,
+  body.xhs-profile-active #xhs-profile-header .xhs-avatar-img,
+  body.xhs-profile-active #xhs-profile-header .xhs-avatar-fallback {
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+}
+`;
+
+    (document.head || document.documentElement).appendChild(style);
+  }
 
   $(window).on('action:ajaxify.start', function () {
     cleanupInjected();
@@ -164,7 +335,9 @@ if (typeof URL !== 'undefined' && typeof URL.canParse !== 'function') {
     } else {
       $('body').removeClass('xhs-profile-candidate');
       if (document.documentElement) {
+        if (document.documentElement) {
         document.documentElement.classList.remove('xhs-profile-html-candidate');
+      }
       }
     }
   }
@@ -288,6 +461,24 @@ if (typeof URL !== 'undefined' && typeof URL.canParse !== 'function') {
               ($el.find('.fullname').length || $el.find('.username').length);
           })
           .first();
+      }
+
+      if (!$top.length) {
+        $top = $account
+          .find('[component="account/profile"], [component="account/header"], .account-header, .profile-header, .user-profile-header, .ha-profile-header')
+          .filter(function () {
+            const $el = $(this);
+            return $el.find('.avatar-wrapper, [component="avatar/picture"], img[component="avatar/picture"], .avatar, .user-icon').length ||
+              $el.find('.fullname, .username, [component="account/username"], [component="account/fullname"]').length;
+          })
+          .first();
+      }
+
+      if (!$top.length) {
+        $top = $account
+          .find('.avatar-wrapper, [component="avatar/picture"], img[component="avatar/picture"], .avatar, .user-icon')
+          .first()
+          .closest('.d-flex, .account-header, .profile-header, .user-profile-header, .ha-profile-header, .card, section, div');
       }
     }
 
