@@ -1,0 +1,25 @@
+{
+  "name": "nodebb-plugin-peipe-xhs-profile",
+  "version": "1.0.0",
+  "description": "nodebb仿小红书个人主页",
+  "main": "library.js",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Hurt6465-ai/nodebb-plugin-peipe-xhs-profile.git"
+  },
+  "keywords": [
+    "nodebb",
+    "nodebb-plugin",
+    "profile",
+    "mobile",
+    "xhs",
+    "peipe"
+  ],
+  "nbbpm": {
+    "compatibility": "^3.0.0 || ^4.0.0"
+  },
+  "engines": {
+    "node": ">=16"
+  }
+}
