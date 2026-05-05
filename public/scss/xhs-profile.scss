@@ -89,7 +89,9 @@
     bottom: 0;
     z-index: 2147483000;
     pointer-events: none;
-    background: #fff !important;
+    background:
+      radial-gradient(circle at 76% 13%, rgba(255,255,255,0.35) 0, rgba(255,255,255,0) 26%),
+      linear-gradient(180deg, #ff6f61 0%, #ff2442 36%, #ffffff 36%, #ffffff 100%);
   }
 
   html.xhs-profile-html-candidate body:not(.xhs-profile-active):not(.xhs-profile-failed)::after,
@@ -97,8 +99,20 @@
   body.page-user:not(.xhs-profile-active):not(.xhs-profile-failed)::after,
   body[class^="page-user-"]:not(.xhs-profile-active):not(.xhs-profile-failed)::after,
   body[class*=" page-user-"]:not(.xhs-profile-active):not(.xhs-profile-failed)::after {
-    content: none !important;
-    display: none !important;
+    content: "";
+    position: fixed;
+    left: 16px;
+    top: 238px;
+    width: calc(100vw - 32px);
+    height: 148px;
+    z-index: 2147483001;
+    pointer-events: none;
+    border-radius: 22px;
+    background:
+      radial-gradient(circle at 44px 44px, rgba(255,255,255,0.94) 0, rgba(255,255,255,0.94) 33px, rgba(255,255,255,0) 34px),
+      linear-gradient(90deg, rgba(255,255,255,0.90) 96px, rgba(255,255,255,0.56) 96px, rgba(255,255,255,0.56) 66%, rgba(255,255,255,0) 66%),
+      linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0));
+    box-shadow: 0 12px 30px rgba(0,0,0,0.08);
   }
 
   html.xhs-profile-html-candidate body .account-content,
@@ -142,12 +156,10 @@
   }
 
   body.xhs-profile-active .account {
-    position: relative !important;
     padding: 0 !important;
     margin: 0 !important;
     max-width: 100% !important;
     overflow: visible !important;
-    background: #fff !important;
   }
 
   .xhs-original-top-hidden,
@@ -167,89 +179,36 @@
     display: none !important;
   }
 
-  // HA theme hard reset: the original cover/header can otherwise sit above the
-  // generated shell and make the uploaded background look like it is "sticking out".
-  body.xhs-profile-active .account .cover:not(.xhs-cover),
-  body.xhs-profile-active .account > .cover,
-  body.xhs-profile-active .account [component="account/cover"],
-  body.xhs-profile-active .account .ha-profile-cover,
-  body.xhs-profile-active .account .profile-cover,
-  body.xhs-profile-active .account .user-cover,
-  body.xhs-profile-active .account .cover-container,
-  body.xhs-profile-active .account .account-cover,
-  body.xhs-profile-active .account [class*="profile-cover"],
-  body.xhs-profile-active .account [class*="user-cover"],
-  body.xhs-profile-active .account [class*="account-cover"] {
-    position: absolute !important;
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-    width: 0 !important;
-    height: 0 !important;
-    min-height: 0 !important;
-    max-height: 0 !important;
-    overflow: hidden !important;
-    z-index: -1 !important;
-  }
-
-  body.xhs-profile-active #xhs-profile-shell,
   #xhs-profile-shell {
-    position: relative !important;
-    z-index: 50 !important;
-    background: #fff !important;
-    isolation: isolate !important;
-    overflow: visible !important;
+    position: relative;
+    z-index: 50;
+    background: #fff;
   }
 
-  body.xhs-profile-active #xhs-profile-header,
   #xhs-profile-header {
-    position: relative !important;
-    width: 100% !important;
-    height: 340px !important;
-    min-height: 340px !important;
-    max-height: 340px !important;
-    overflow: hidden !important;
-    background: #fff !important;
-    z-index: 160 !important;
-    border-radius: 0 !important;
-    transform: none !important;
+    position: relative;
+    width: 100%;
+    min-height: 340px;
+    overflow: visible;
+    background: #fff;
+    z-index: 160;
   }
 
-  body.xhs-profile-active #xhs-profile-header .xhs-cover,
   .xhs-cover {
-    position: absolute !important;
-    left: 0 !important;
-    top: 0 !important;
-    right: 0 !important;
-    bottom: auto !important;
-    width: 100% !important;
-    height: 340px !important;
-    min-height: 340px !important;
-    max-height: 340px !important;
-    background-size: cover !important;
-    background-position: center top !important;
-    background-repeat: no-repeat !important;
-    border-radius: 0 !important;
-    transform: none !important;
-    overflow: hidden !important;
-    z-index: 0 !important;
+    width: 100%;
+    height: 340px;
+    background-size: cover;
+    background-position: center top;
+    background-repeat: no-repeat;
+    position: absolute;
+    inset: 0;
   }
 
-  body.xhs-profile-active #xhs-profile-header .xhs-cover-shade,
   .xhs-cover-shade {
-    position: absolute !important;
-    left: 0 !important;
-    top: 0 !important;
-    right: 0 !important;
-    bottom: auto !important;
-    width: 100% !important;
-    height: 340px !important;
-    min-height: 340px !important;
-    max-height: 340px !important;
-    background: linear-gradient(180deg, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0.26) 55%, rgba(0,0,0,0.58) 100%) !important;
-    z-index: 1 !important;
-    pointer-events: none !important;
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0.26) 55%, rgba(0,0,0,0.58) 100%);
+    z-index: 1;
   }
 
   .xhs-header-overlay {
@@ -681,17 +640,11 @@
   }
 
   body.xhs-profile-active .account-content {
-    clear: both !important;
-    display: block !important;
     padding: 16px 16px 88px 16px !important;
-    min-height: 30vh !important;
-    position: relative !important;
-    z-index: 20 !important;
-    background: #fff !important;
-    margin-top: 0 !important;
-    border-radius: 0 !important;
-    transform: none !important;
-    overflow: visible !important;
+    min-height: 30vh;
+    position: relative;
+    z-index: 1;
+    background: #fff;
   }
 
   body.xhs-profile-active .account-content > * {
@@ -731,11 +684,4 @@
   body.xhs-profile-active .xhs-account-layout {
     flex-direction: column !important;
   }
-
-  body.xhs-profile-active::before,
-  body.xhs-profile-active::after {
-    content: none !important;
-    display: none !important;
-  }
-
 }
