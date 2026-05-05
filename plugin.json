@@ -1,0 +1,14 @@
+{
+  "id": "nodebb-plugin-peipe-xhs-profile",
+  "name": "Peipe XHS Mobile Profile",
+  "description": "Mobile Xiaohongshu-style H5 profile page for NodeBB with cover image pre-upload compression.",
+  "url": "https://github.com/Hurt6465-ai/nodebb-plugin-peipe-xhs-profile",
+  "library": "./library.js",
+  "scripts": [
+    "public/lib/client.js"
+  ],
+  "scss": [
+    "public/scss/xhs-profile.scss"
+  ],
+  "languages": "languages"
+}
